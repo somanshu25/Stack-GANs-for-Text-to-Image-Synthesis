@@ -1,0 +1,1 @@
+# Stack-GANs-for-Text-to-Image-Synthesis
