@@ -11,6 +11,7 @@ __C.TextDim = 1024
 __C.LatentDim = 100
 __C.ImageSizeStageI = 64
 __C.ImageSizeStageII = 256 
+__C.CUDA = True
 
 # Config variables for Training GANS
 
