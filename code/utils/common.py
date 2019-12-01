@@ -11,12 +11,13 @@ from config import cfg
 
 class residualBlocks(nn.Module):
     def __init__(self,channels):
+        super(residualBlocks,self).__init__()
         self.resBlock = nn.Sequential (
             nn.Conv2d(channels,channels,3,stride = 1, padding =1 , bias = False),
-            nn.BatchNorm2D(channels),
+            nn.BatchNorm2d(channels),
             nn.ReLU(True),
             nn.Conv2d(channels,channels,3,stride = 1, padding =1 , bias = False),
-            nn.BatchNorm2D(channels))
+            nn.BatchNorm2d(channels))
         self.relu  = nn.ReLU(True)
 
     def forward(self,input):
@@ -29,7 +30,7 @@ def upSamplingAtomic(inputChannels, outputChannels):
     upSamplingBlock = nn.Sequential (
         nn.Upsample(2,'nearest'),
         nn.Conv2d(inputChannels,outputChannels,3,stride = 1, padding =1 , bias = False),
-        nn.BatchNorm2D(outputChannels),
+        nn.BatchNorm2d(outputChannels),
         nn.ReLU(True)
     )
     return upSamplingBlock
@@ -73,6 +74,39 @@ class ConditioningAugment(nn.Module):
         eps = Variable(eps)
         temp = eps.mul(std).add_(mu)
         return temp, mu, var
+
+class LogitsForDiscriminator(nn.Module):
+    def __init__(self,tDim,cDim,conditionCrit = True):
+        super(LogitsForDiscriminator,self).__init__()
+        self.tDim = tDim * 8
+        self.cDim = cDim
+        self.conditionCrit = conditionCrit
+        if self.conditionCrit:
+            self.output = nn.Sequential(
+                nn.Conv2d(self.tDim + self.cDim,self.tDim,3,stride = 1, padding =1 , bias = False),
+                nn.BatchNorm2d(self.tDim)
+                nn.LeakyReLU(0.2,True)
+                nn.Conv2d(self.tDim,1,kernel_size = 4,stride = 4),
+                nn.Sigmoid()
+            )
+        else:
+            self.output = nn.Sequential(
+                nn.Conv2d(self.tDim,1,kernel_size = 4,stride = 4),
+                nn.Sigmoid()  
+            ) 
+    
+    def forward(self,h,c = None):
+        if self.conditionCrit and c is not None:
+            c = c.view(-1,self.cDim,1,1)
+            c = c.repeat(1,1,4,4)
+            hc = torch.cat((h,c),1)
+        else
+            hc = h
+        
+        output = self.output(hc)
+        return output.view(-1)
+
+
 
 
 
