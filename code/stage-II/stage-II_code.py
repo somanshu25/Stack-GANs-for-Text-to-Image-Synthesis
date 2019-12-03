@@ -42,10 +42,10 @@ class GenStageII(nn.Module):
       self.ConditioningAugment = ConditioningAugment()
       self.encoder = nn.Sequential(
           nn.Conv2d(3,GID,3,stride = 1, padding =1 , bias = False),
-          nn.ReLU(True)
-          self.downSamplingAtomic(GID, GID*2)
-          self.downSamplingAtomic(GID*2, GID*4)
-      )
+          nn.ReLU(True))
+      self.downSample1 = self.downSamplingAtomic(GID, GID*2)
+      self.downSample2 = self.downSamplingAtomic(GID*2, GID*4)
+      
       self.HighRes = nn.Sequential(
           nn.Conv2d(self.cDim+GID*4, GID*4, 3, stride = 1, padding =1, bias = False),
           nn.BatchNorm2d(GID*4)
@@ -58,7 +58,7 @@ class GenStageII(nn.Module):
     #     for i in range(cfg.GAN.R_NUM):
     #         layers.append(block(channel_num))
     #     return nn.Sequential(*layers)
-    
+
       self.residual = self._make_layer(ResBlock, GID * 4)
       
       self.upSample1 = upSamplingAtomic(GID * 4, GID * 2)
@@ -74,11 +74,13 @@ class GenStageII(nn.Module):
         a, imgStageI, c, d = self.GenStageI(textEmbedding, noise)
         imgStageI = imgStageI.detach()
         encodedImg = self.encoder(imgStageI)
+        tempencodedImg = self.downSample1(encodedImg)
+        FinEncodedImg = self.downSample2(tempencodedImg)
 
         temp, mu, var = self.ConditioningAugment(textEmbedding)
         temp = temp.view(-1, self.cDim, 1, 1)
         temp = temp.repeat(1, 1, 16, 16)
-        temp1 = torch.cat([encodedImg, temp], 1)
+        temp1 = torch.cat([FinEncodedImg, temp], 1)
         temp2 = self.HighRes(temp1)
         temp2 = self.residual(temp2)
 
@@ -90,6 +92,7 @@ class GenStageII(nn.Module):
         fakeImg = self.img(temp2)
 
         return imgStageI, fakeImg, mu, var
+
 
 
 
@@ -108,12 +111,14 @@ class DiscStageII(nn.Module):
     CD = self.cDim
     self.ImgEncode = nn.Sequential(
         nn.Conv2d(3, DID, 4, 2, 1, bias=False),
-        nn.LeakyReLU(0.2, inplace=True),
-        DiscdownSampling(DID, DID*2),
-        DiscdownSampling(DID*2, DID*4),
-        DiscdownSampling(DID*4, DID*8),
-        DiscdownSampling(DID*8, DID*16),
-        DiscdownSampling(DID*16, DID*32),
+        nn.LeakyReLU(0.2, inplace=True))
+    
+    self.down1 = DiscdownSampling(DID, DID*2)
+    self.down2 = DiscdownSampling(DID*2, DID*4)
+    self.down3 = DiscdownSampling(DID*4, DID*8)
+    self.down4 = DiscdownSampling(DID*8, DID*16)
+    self.down5 = DiscdownSampling(DID*16, DID*32)
+    self.tempEncode =nn.Sequential(
         nn.Conv2d(DID*32, DID*16, 4, 2, 1, bias=False),
         nn.BatchNorm2d(DID*16),
         nn.LeakyReLU(0.2, inplace=True),
@@ -127,4 +132,10 @@ class DiscStageII(nn.Module):
 
     def forward(self, img):
       imgEmbedding = self.ImgEncode(img)
-      return imgEmbedding 
+      downSample1 = self.down1(imgEmbedding)
+      downSample2 = self.down2(downSample1)
+      downSample3 = self.down3(downSample2)
+      downSample4 = self.down4(downSample3)
+      downSample5 = self.down5(downSample4)
+      finalOutput = self.tempEncode(downSample5)
+      return finalOutput 
