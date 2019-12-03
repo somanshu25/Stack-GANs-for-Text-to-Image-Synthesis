@@ -27,8 +27,7 @@ __C.KLCoeff = 2
 __C.ConditionDim = 128
 __C.DiscInputDim = 64
 __C.GenInputDim = 128
-__C.NET_G = ''
-__C.NET_D = ''
+
 
 
 
