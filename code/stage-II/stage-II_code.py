@@ -10,7 +10,7 @@ import torchfile
 from config import cfg
 from common import ConditioningAugment
 from common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
-from StageI import GenStageI
+from StageI import STAGE1_Generator
 
 
 
@@ -24,14 +24,14 @@ def DiscdownSampling(inputChannels,outputChannels):
   
   
 class GenStageII(nn.Module):
-  def __init__(self, StageI):
+  def __init__(self, STAGE1_Generator):
     super(GenStageII, self).__init__()
     self.gDim = cfg.GenInputDim
     self.cDim = cfg.ConditionDim
     self.zDim = cfg.LatentDim
-    self.GenStageI = GenStageI
+    self.STAGE1_Generator = STAGE1_Generator
 
-    for param in GenStageI.parameters():
+    for param in STAGE1_Generator.parameters():
       param.requires_grad = False
     self.network()
 
