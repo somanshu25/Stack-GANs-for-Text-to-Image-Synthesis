@@ -91,6 +91,7 @@ class STAGE1_Discriminator(nn.Module):
         imgEncode1 = self.down1(c1)
         imgEncode2 = self.down1(imgEncode1)
         imgEncode = self.down1(imgEncode2)
-        return imgEncode
+
+        return imgEncoding
 
       
