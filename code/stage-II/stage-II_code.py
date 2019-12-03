@@ -23,7 +23,7 @@ def DiscdownSampling(inputChannels,outputChannels):
     return DiscdownSamplingBlock
   
   
-  class GenStageII(nn.Module):
+class GenStageII(nn.Module):
   def __init__(self, StageI):
     super(GenStageII, self).__init__()
     self.gDim = cfg.GenInputDim
