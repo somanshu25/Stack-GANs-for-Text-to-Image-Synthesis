@@ -1,3 +1,17 @@
+import torch.backends.cudnn as cudnn
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+import torch.optim as optim
+import os
+import time
+import numpy as np
+import torchfile
+from config import cfg
+from common import ConditioningAugment
+from common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
+
+
 class STAGE1_Generator(nn.Module):
     def __init__(self):
         super(STAGE1_Generator, self).__init__()
@@ -46,6 +60,37 @@ class STAGE1_Generator(nn.Module):
         generated_image = self.image1(h5)
         
         return generated_image
-      
-      
+
+class STAGE1_Discriminator(nn.Module):
+    def __init__(self):
+        super(STAGE1_Discriminator, self).__init__()
+        self.DiscDim = cfg.DiscInputDim
+        self.ConditionDim = cfg.ConditionDim
+        self.disc_module()
+
+    def disc_module(self):
+        discDim = self.DiscDim      # 64
+        conditionDIm = self.ConditionDim    #128
+        # 3 X 64 X 64
+        self.convLayer = nn.Sequential(             
+            nn.Conv2D(3,discDim,4,2,1,bias=False)
+            nn.LeakyReLU(0.2,inplace = True)
+        )
+        # 64 X 32 X 32
+        self.down1 = downSamplingAtomic(discDim, DiscDim * 2)   
+        # 128 X 16 X 16
+        self.down2 = downSamplingAtomic(discDim *2 , discDim *4)
+        # 256 X 8 X 8
+        self.down3 = downSamplingAtomic(discDim * 4, discDim * 8)
+        # 512 X 4 X 4
+
+        self.getConditionalLogits = LogitsForDiscriminator(discDim,conditionDIm)
+    
+    def forward(self,image):
+        c1 = self.convLayer(image)
+        imgEncode1 = self.down1(c1)
+        imgEncode2 = self.down1(imgEncode1)
+        imgEncode = self.down1(imgEncode2)
+        return imgEncode
+
       
