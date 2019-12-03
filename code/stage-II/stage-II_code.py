@@ -10,7 +10,7 @@ import torchfile
 from config import cfg
 from common import ConditioningAugment
 from common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
-from StageI import STAGE1_Generator
+from stage-I.stage1 import STAGE1_Generator
 
 
 
