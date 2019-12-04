@@ -8,6 +8,8 @@ import time
 import numpy as np
 import torchfile
 from config import cfg
+import os
+import errno
 
 class residualBlocks(nn.Module):
     def __init__(self,channels):
@@ -138,7 +140,28 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
 
     return errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong, errDiscReal, errDiscWrong, errDiscFake
 
-
+def save_images(data_image, fake_im, epoch, image_dir):
+    img1_size = cfg.ImageSizeStageI
+    fake_im = fake[0:img1_size]
+    if data_image is not None:
+        data_image = data_image[0:img1_size]
+        torchvision.utils.save_image(data_image, '%s/true_samples.png' % image_dir, normalize=True)
+        torchvision.utils.save_image(fake_im.data, '%s/fake_samples_epoch_%03d.png' % (image_dir, epoch), normalize=True)
+               
+def save_model(netG, netD, epoch, model_dir):
+  
+    torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (model_dir, epoch))
+    torch.save(netD.state_dict(),' %s/netD_epoch_last.pth' % (model_dir))
+    print('Models saved')
+    
+def makedir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
     
 
 
