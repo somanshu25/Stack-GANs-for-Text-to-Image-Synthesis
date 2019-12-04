@@ -41,7 +41,7 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
     wrongLogits = nn.parallel.data.parallel(netDisc.getConditionalLogits,(realEmbedding[:realImages.shape[0]-1],cond[1:0]),gpus)
     errDiscWrong = criterion(wrongLogits,fakeLabels[1:0])
 
-    return errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong
+    return errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong, errDiscReal, errDiscWrong, errDiscFake
 
 
 

@@ -89,8 +89,8 @@ class STAGE1_Discriminator(nn.Module):
     def forward(self,image):
         c1 = self.convLayer(image)
         imgEncode1 = self.down1(c1)
-        imgEncode2 = self.down1(imgEncode1)
-        imgEncode = self.down1(imgEncode2)
+        imgEncode2 = self.down2(imgEncode1)
+        imgEncode = self.down3(imgEncode2)
 
         return imgEncoding
 

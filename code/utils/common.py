@@ -39,7 +39,7 @@ def downSamplingAtomic(inputChannels,outputChannels):
     downSamplingBlock = nn.Sequential(
          nn.Conv2d(inputChannels, outputChannels, 4, 2, 1, bias=False),
          nn.BatchNorm2d(outputChannels),
-         nn.ReLU(True),
+         nn.LeakyReLU(True),
     ) 
     return downSamplingBlock
 
