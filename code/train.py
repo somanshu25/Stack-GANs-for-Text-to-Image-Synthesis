@@ -16,12 +16,10 @@ import os
 import time
 import numpy as np
 import torchfile
-from config import cfg
+from utils.config import cfg
 from stage1 import STAGE1_Generator,STAGE1_Discriminator
-from computeLoss import computeGeneratorLoss,computeDiscriminatorLoss
+from utils.common import computeGeneratorLoss,computeDiscriminatorLoss
 import errno
-
-
 
 
 
