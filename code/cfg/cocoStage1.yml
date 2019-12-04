@@ -1,0 +1,13 @@
+ConfigName: 'stage1'
+GPU_ID: '0,1'
+LatentDim: 100
+DataDir: '../data/coco'
+ImageSizeStage1: 64
+Workers: 4
+Stage: 1
+BatchSize: 128
+NumEpochs: 120
+LRDecayEpoch: 20
+saveModelEpoch: 10
+DiscInputDim: 96
+GenInputDim: 192
