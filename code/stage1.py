@@ -7,9 +7,9 @@ import os
 import time
 import numpy as np
 import torchfile
-from config import cfg
-from common import ConditioningAugment
-from common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
+from utils.config import cfg
+from utils.common import ConditioningAugment
+from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
 
 
 class STAGE1_Generator(nn.Module):
