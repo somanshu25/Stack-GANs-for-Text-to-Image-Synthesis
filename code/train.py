@@ -117,7 +117,7 @@ class STAGE1_GAN:
                 errG_total.backward()
                 optimizerG.step()
 
-                if i % 100 ==0 && epoch % 5 == 0:
+                if i % 100 ==0 and epoch % 5 == 0:
                     summary_D = summary.scalar('D_loss', errD.data[0])
                     summary_D_r = summary.scalar('D_loss_real', errD_real)
                     summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
@@ -134,8 +134,11 @@ class STAGE1_GAN:
                     save_images(None, fakeImgs , epoch, self.image_dir)
 
                 end_t = time.time()
-                print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f , Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f , Total Time: %.2fsec '''
-#                   % (epoch, self.max_epoch, i, len(data_loader), errDisc.data[0], errGen.data[0], kl_loss.data[0], errDiscReal, errDiscWrong, errDiscFake, (end_t - start_t)))
-                
-                if epoch % cfg.saveModelEpoch == 0:
+                print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
+                     Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
+                     Total Time: %.2fsec
+                     '''
+                     % (epoch, self.max_epoch, i, len(data_loader), errDisc.data[0], errGen.data[0], kl_loss.data[0], errDiscReal, errDiscWrong, errDiscFake, (end_t - start_t)))
+
+                if(epoch % cfg.saveModelEpoch == 0):
                   save_model(netG, netD, epoch, self.model_dir)

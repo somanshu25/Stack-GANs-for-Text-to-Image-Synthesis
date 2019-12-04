@@ -73,7 +73,7 @@ class STAGE1_Discriminator(nn.Module):
         conditionDIm = self.ConditionDim    #128
         # 3 X 64 X 64
         self.convLayer = nn.Sequential(             
-            nn.Conv2D(3,discDim,4,2,1,bias=False)
+            nn.Conv2D(3,discDim,4,2,1,bias=False),
             nn.LeakyReLU(0.2,inplace = True)
         )
         # 64 X 32 X 32

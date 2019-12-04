@@ -9,16 +9,16 @@ cfg = __C
 
 __C.TextDim = 1024
 __C.LatentDim = 100
-__C.ImageSizeStageI = 64
-__C.ImageSizeStageII = 256 
+# __C.ImageSizeStageI = 64
+# __C.ImageSizeStageII = 256
 __C.CUDA = True
 __C.GPU_ID = '0'
 __C.DatasetName = 'coco'
 __C.Workers = 6
 __C.ConfigName = ''
-__C.Stage = ''
+__C.Stage = 1
 __C.DataDir = ''
-
+__C.ImSize = 64
 # Config variables for Training GANS
 
 __C.BatchSize = 64
@@ -42,13 +42,14 @@ def _merge_a_into_b(a, b):
     if type(a) is not edict:
         return
 
-    for k, v in a.iteritems():
+    for k, v in a.items():
         # a must specify keys that are in b
-        if not b.has_key(k):
+        if not k in b:
             raise KeyError('{} is not a valid config key'.format(k))
 
         # the types must match, too
         old_type = type(b[k])
+        print(old_type)
         if old_type is not type(v):
             if isinstance(b[k], np.ndarray):
                 v = np.array(v, dtype=b[k].dtype)

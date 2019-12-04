@@ -7,7 +7,7 @@ import os
 import time
 import numpy as np
 import torchfile
-from config import cfg
+from utils.config import cfg
 import os
 import errno
 
@@ -86,8 +86,8 @@ class LogitsForDiscriminator(nn.Module):
         if self.conditionCrit:
             self.output = nn.Sequential(
                 nn.Conv2d(self.tDim + self.cDim,self.tDim,3,stride = 1, padding =1 , bias = False),
-                nn.BatchNorm2d(self.tDim)
-                nn.LeakyReLU(0.2,True)
+                nn.BatchNorm2d(self.tDim),
+                nn.LeakyReLU(0.2,True),
                 nn.Conv2d(self.tDim,1,kernel_size = 4,stride = 4),
                 nn.Sigmoid()
             )
@@ -102,7 +102,7 @@ class LogitsForDiscriminator(nn.Module):
             c = c.view(-1,self.cDim,1,1)
             c = c.repeat(1,1,4,4)
             hc = torch.cat((h,c),1)
-        else
+        else:
             hc = h
         
         output = self.output(hc)
