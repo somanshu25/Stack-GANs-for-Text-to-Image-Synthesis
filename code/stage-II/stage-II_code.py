@@ -26,15 +26,15 @@ def DiscdownSampling(inputChannels,outputChannels):
 class GenStageII(nn.Module):
   def __init__(self, STAGE1_Generator):
     super(GenStageII, self).__init__()
-    self.gDim = cfg.GenInputDim
-    self.cDim = cfg.ConditionDim
-    self.zDim = cfg.LatentDim
-    self.STAGE1_Generator = STAGE1_Generator
 
     for param in STAGE1_Generator.parameters():
       param.requires_grad = False
     self.network()
 
+    self.gDim = cfg.GenInputDim
+    self.cDim = cfg.ConditionDim
+    self.zDim = cfg.LatentDim
+    self.STAGE1_Generator = STAGE1_Generator
 
   def network(self):
     GID = self.gDim
@@ -53,13 +53,14 @@ class GenStageII(nn.Module):
     )
 
       
-    # def _make_layer(self, block, channel_num):
-    #     layers = []
-    #     for i in range(cfg.GAN.R_NUM):
-    #         layers.append(block(channel_num))
-    #     return nn.Sequential(*layers)
+  def createLayer(self, resblock, numChannel):
+    
+    layers = []
+    for i in range(cfg.GAN.R_NUM):
+        layers.append(resblock(numChannel))
+    return nn.Sequential(*layers)
 
-    self.residual = self._make_layer(ResBlock, GID * 4)
+    self.residual = self.createLayer(ResBlock, GID * 4)
     
     self.upSample1 = upSamplingAtomic(GID * 4, GID * 2)
     self.upSample2 = upSamplingAtomic(GID * 2, GID)
@@ -71,7 +72,7 @@ class GenStageII(nn.Module):
         nn.Tanh())
 
   def forward(self, textEmbedding, noise):
-    a, imgStageI, c, d = self.GenStageI(textEmbedding, noise)
+    a, imgStageI, c, d = self.STAGE1_Generator(textEmbedding, noise)
     imgStageI = imgStageI.detach()
     encodedImg = self.encoder(imgStageI)
     tempencodedImg = self.downSample1(encodedImg)
@@ -93,12 +94,6 @@ class GenStageII(nn.Module):
 
     return imgStageI, fakeImg, mu, var
 
-
-
-
-
-
-      
 class DiscStageII(nn.Module):
   
   def __init__(self):
@@ -141,4 +136,8 @@ class DiscStageII(nn.Module):
     downSample5 = self.down5(downSample4)
     finalOutput = self.tempEncode(downSample5)
     return finalOutput 
+
+
+
+
         
