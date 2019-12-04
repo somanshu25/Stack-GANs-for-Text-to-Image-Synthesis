@@ -7,7 +7,18 @@ Original file is located at
     https://colab.research.google.com/drive/195S3pktp1LTzA_ckRMSQdFSjSH8AsUqp
 """
 
+import torch.backends.cudnn as cudnn
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+import torch.optim as optim
 import os
+import time
+import numpy as np
+import torchfile
+from config import cfg
+from stage1 import STAGE1_Generator,STAGE1_Discriminator
+from computeLoss import computeGeneratorLoss,computeDiscriminatorLoss
 import errno
 
 
@@ -34,20 +45,6 @@ def makedir(path):
         else:
             raise
 
-# Commented out IPython magic to ensure Python compatibility.
-import torch.backends.cudnn as cudnn
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
-import torch.optim as optim
-import os
-import time
-import numpy as np
-import torchfile
-from config import cfg
-from stage1 import STAGE1_Generator,STAGE1_Discriminator
-from computeLoss import computeGeneratorLoss,computeDiscriminatorLoss
-import errno
 
 class STAGE1_GAN:
     def __init__(self, output_dir):
