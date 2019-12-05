@@ -18,20 +18,22 @@ import numpy as np
 import torchfile
 from utils.config import cfg
 from stage1 import STAGE1_Generator,STAGE1_Discriminator
-from utils.common import computeGeneratorLoss,computeDiscriminatorLoss
+from utils.common import computeGeneratorLoss,computeDiscriminatorLoss, makedir, weights_init, save_images, save_model, KL_loss
+#from tensorboard import summary
+#from tensorboard import FileWriter
 import errno
 
 
 
 class STAGE1_GAN:
     def __init__(self, output_dir):
-        self.model_dir = os.path.joint(output_dir,'Model')
-        self.image_dir = os.path.joint(output_dir,'Image')
-        self.log_dir = os.path.joint(output_dir,'Log')
+        self.model_dir = os.path.join(output_dir,'Model')
+        self.image_dir = os.path.join(output_dir,'Image')
+        self.log_dir = os.path.join(output_dir,'Log')
         makedir(self.model_dir)
         makedir(self.image_dir)
         makedir(self.log_dir)
-        self.summary_writer = FileWriter(self.log_dir)
+        #self.summary_writer = FileWriter(self.log_dir)
 
         self.max_epoch = cfg.NumEpochs
         s_gpus = cfg.GPU_ID.split(',')
@@ -54,11 +56,11 @@ class STAGE1_GAN:
         return netG,netD
     
     def train1(self,data_loader):
-        netG,netD = self.loadStage1()       # Initialize Generator and Discriminator
+        netG, netD = self.loadStage1()       # Initialize Generator and Discriminator
         nz = cfg.LatentDim                  # 100
-        latentInitial = Variable(torch.FloatTensor(batch,nz))   ## Latent variables
-        realLabels = Variable(torch.FloatTensor(batch).fill_(1))  ## Real values (1)
-        fakeLabels = Variable(torch.FloatTensor(batch).fill_(0))  ## Fake values (0)
+        latentInitial = Variable(torch.FloatTensor(self.batch_size,nz))   ## Latent variables
+        realLabels = Variable(torch.FloatTensor(self.batch_size).fill_(1))  ## Real values (1)
+        fakeLabels = Variable(torch.FloatTensor(self.batch_size).fill_(0))  ## Fake values (0)
 
         if cfg.CUDA:
             realLabels = realLabels.cuda()
@@ -100,37 +102,37 @@ class STAGE1_GAN:
 
                 ##### Generate fake images
                 latentInitial.data.normal_(0, 1)
-                inputs = (txt_embedding, latentInitial)
+                inputs = (txtEmbedding, latentInitial)
                 _, fakeImgs, mu, logvar = nn.parallel.data_parallel(netG, inputs, self.gpus)
 
                 #####  Update D network
                 netD.zero_grad()
                 errDisc, errDiscReal, errDiscWrong, errDiscFake = computeDiscriminatorLoss(netD, realImgs, fakeImgs, realLabels, fakeLabels, mu, self.gpus)
-                errD.backward()
+                errDisc.backward()
                 optimizerD.step()
 
                 #####  Update G network
                 netG.zero_grad()
                 errGen = computeGeneratorLoss(netD, fakeImgs, realLabels, mu, self.gpus)
                 kl_loss = KL_loss(mu, logvar)
-                errG_total = errG + kl_loss * cfg.KLCoeff
+                errG_total = errGen + kl_loss * cfg.KLCoeff
                 errG_total.backward()
                 optimizerG.step()
 
                 if i % 100 ==0 and epoch % 5 == 0:
-                    summary_D = summary.scalar('D_loss', errD.data[0])
-                    summary_D_r = summary.scalar('D_loss_real', errD_real)
-                    summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
-                    summary_D_f = summary.scalar('D_loss_fake', errD_fake)
-                    summary_G = summary.scalar('G_loss', errG.data[0])
-                    summary_KL = summary.scalar('KL_loss', kl_loss.data[0])
-
-                    self.summary_writer.add_summary(summary_D, count)
-                    self.summary_writer.add_summary(summary_D_r, count)
-                    self.summary_writer.add_summary(summary_D_w, count)
-                    self.summary_writer.add_summary(summary_D_f, count)
-                    self.summary_writer.add_summary(summary_G, count)
-                    self.summary_writer.add_summary(summary_KL, count)
+                    # summary_D = summary.scalar('D_loss', errD.data[0])
+                    # summary_D_r = summary.scalar('D_loss_real', errD_real)
+                    # summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
+                    # summary_D_f = summary.scalar('D_loss_fake', errD_fake)
+                    # summary_G = summary.scalar('G_loss', errG.data[0])
+                    # summary_KL = summary.scalar('KL_loss', kl_loss.data[0])
+                    #
+                    # self.summary_writer.add_summary(summary_D, count)
+                    # self.summary_writer.add_summary(summary_D_r, count)
+                    # self.summary_writer.add_summary(summary_D_w, count)
+                    # self.summary_writer.add_summary(summary_D_f, count)
+                    # self.summary_writer.add_summary(summary_G, count)
+                    # self.summary_writer.add_summary(summary_KL, count)
                     save_images(None, fakeImgs , epoch, self.image_dir)
 
                 end_t = time.time()

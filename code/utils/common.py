@@ -2,6 +2,7 @@ import torch.backends.cudnn as cudnn
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+import torchvision
 import torch.optim as optim
 import os
 import time
@@ -142,7 +143,7 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
 
 def save_images(data_image, fake_im, epoch, image_dir):
     img1_size = cfg.ImageSizeStageI
-    fake_im = fake[0:img1_size]
+    fake_im = fake_im[0:img1_size]
     if data_image is not None:
         data_image = data_image[0:img1_size]
         torchvision.utils.save_image(data_image, '%s/true_samples.png' % image_dir, normalize=True)

@@ -35,4 +35,5 @@ if __name__ == "__main__":
             drop_last=True, shuffle=True, num_workers=int(cfg.Workers))
 
     algo = STAGE1_GAN(output_dir)
-    algo.train(dataloader, cfg.Stage)
+
+    algo.train1(dataloader)  #cfg.Stage

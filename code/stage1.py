@@ -29,7 +29,7 @@ class STAGE1_Generator(nn.Module):
         self.fc1 = nn.Sequential(
             nn.Linear(num_input, num_text_input * 4 * 4),
             nn.BatchNorm1d(num_text_input * 4 * 4),
-            nn.ReLU)
+            nn.ReLU())
 
         #Upsampling
         self.up1 = upSamplingAtomic(num_text_input, num_text_input // 2)            # 1024 x 4 x 4 - 512 x 8 x 8
@@ -37,7 +37,7 @@ class STAGE1_Generator(nn.Module):
         self.up3 = upSamplingAtomic(num_text_input // 4, num_text_input // 8)       # 256 x 16 x 16 - 128 x 32 x 32
         self.up4 = upSamplingAtomic(num_text_input // 8, num_text_input // 16)      # 128 x 32 x 32 - 64 x 64 x 64
         self.image1 = nn.Sequential(                          # 64 x 64 x 64 - 3 x 64 x 64 (Reducing number of channels to 3)
-            conv3x3(num_text_input // 16, 3),
+            nn.Conv2d(num_text_input // 16, 3,3,stride = 1, padding =1 , bias = False),
             nn.Tanh())
 
     def forward(self, txt_embed, noise):
@@ -73,11 +73,11 @@ class STAGE1_Discriminator(nn.Module):
         conditionDIm = self.ConditionDim    #128
         # 3 X 64 X 64
         self.convLayer = nn.Sequential(             
-            nn.Conv2D(3,discDim,4,2,1,bias=False),
+            nn.Conv2d(3,discDim,4,2,1,bias=False),
             nn.LeakyReLU(0.2,inplace = True)
         )
         # 64 X 32 X 32
-        self.down1 = downSamplingAtomic(discDim, DiscDim * 2)   
+        self.down1 = downSamplingAtomic(discDim, discDim * 2)
         # 128 X 16 X 16
         self.down2 = downSamplingAtomic(discDim *2 , discDim *4)
         # 256 X 8 X 8
@@ -92,6 +92,6 @@ class STAGE1_Discriminator(nn.Module):
         imgEncode2 = self.down2(imgEncode1)
         imgEncode = self.down3(imgEncode2)
 
-        return imgEncoding
+        return imgEncode
 
       
