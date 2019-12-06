@@ -28,7 +28,7 @@ __C.saveModelEpoch = 50
 __C.DiscLR = 0.0002
 __C.GenLR = 0.0002
 __C.KLCoeff = 2
-
+__C.RNum = 4
 # Config parameters for mode options for GANS
 
 __C.ConditionDim = 128
