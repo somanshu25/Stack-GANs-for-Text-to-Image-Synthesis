@@ -123,8 +123,8 @@ class DiscStageII(nn.Module):
         nn.LeakyReLU(0.2, inplace=True)    
     )
 
-    self.condLogits = LogitsForDiscriminator(DID, CD, bcondition = True)
-    self.uncondLogits = LogitsForDiscriminator(DID, CD, bcondition = False)
+    self.condLogits = LogitsForDiscriminator(DID, CD, conditionCrit = True)
+    self.uncondLogits = LogitsForDiscriminator(DID, CD, conditionCrit = False)
 
   def forward(self, img):
 
