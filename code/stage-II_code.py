@@ -48,7 +48,7 @@ class GenStageII(nn.Module):
     
     self.HighRes = nn.Sequential(
         nn.Conv2d(self.cDim+GID*4, GID*4, 3, stride = 1, padding =1, bias = False),
-        nn.BatchNorm2d(GID*4)
+        nn.BatchNorm2d(GID*4),
         nn.ReLU(True)
     )
 
