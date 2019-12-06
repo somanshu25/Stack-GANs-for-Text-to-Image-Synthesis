@@ -7,10 +7,10 @@ import os
 import time
 import numpy as np
 import torchfile
-from config import cfg
-from common import ConditioningAugment
-from common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
-from stage-I.stage1 import STAGE1_Generator
+from utils.config import cfg
+from utils.common import ConditioningAugment
+from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator, residualBlocks
+from stage1 import STAGE1_Generator
 
 
 
@@ -36,6 +36,13 @@ class GenStageII(nn.Module):
     self.zDim = cfg.LatentDim
     self.STAGE1_Generator = STAGE1_Generator
 
+  def createLayer(self, resblock, numChannel):
+
+      layers = []
+      for i in range(cfg.GAN.R_NUM):
+          layers.append(resblock(numChannel))
+      return nn.Sequential(*layers)
+
   def network(self):
     GID = self.gDim
     self.downSamplingAtomic = downSamplingAtomic()
@@ -48,25 +55,16 @@ class GenStageII(nn.Module):
     
     self.HighRes = nn.Sequential(
         nn.Conv2d(self.cDim+GID*4, GID*4, 3, stride = 1, padding =1, bias = False),
-        nn.BatchNorm2d(GID*4)
+        nn.BatchNorm2d(GID*4),
         nn.ReLU(True)
     )
+    self.residual = self.createLayer(residualBlocks, GID * 4)
 
-      
-  def createLayer(self, resblock, numChannel):
-    
-    layers = []
-    for i in range(cfg.GAN.R_NUM):
-        layers.append(resblock(numChannel))
-    return nn.Sequential(*layers)
-
-    self.residual = self.createLayer(ResBlock, GID * 4)
-    
     self.upSample1 = upSamplingAtomic(GID * 4, GID * 2)
     self.upSample2 = upSamplingAtomic(GID * 2, GID)
     self.upSample3 = upSamplingAtomic(GID, GID // 2)
     self.upSample4 = upSamplingAtomic(GID // 2, GID // 4)
-    
+
     self.img = nn.Sequential(
         nn.Conv2d(GID // 4, 3, 3, stride = 1, padding =1, bias = False),
         nn.Tanh())
@@ -123,8 +121,8 @@ class DiscStageII(nn.Module):
         nn.LeakyReLU(0.2, inplace=True)    
     )
 
-    self.condLogits = LogitsForDiscriminator(DID, CD, bcondition = True)
-    self.uncondLogits = LogitsForDiscriminator(DID, CD, bcondition = False)
+    self.condLogits = LogitsForDiscriminator(DID, CD, conditionCrit = True)
+    self.uncondLogits = LogitsForDiscriminator(DID, CD, conditionCrit = False)
 
   def forward(self, img):
 
