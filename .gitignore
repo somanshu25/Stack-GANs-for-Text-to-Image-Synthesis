@@ -108,3 +108,6 @@ venv.bak/
 
 code/.idea/
 code/utils/.common.py.swp
+data/
+output/
+.idea/

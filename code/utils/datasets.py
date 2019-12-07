@@ -31,6 +31,7 @@ class TextDataset(data.Dataset):
         else:
             self.bbox = None
         split_dir = os.path.join(data_dir, split)
+        # C:\Users\vedire\Desktop\Stack-GANs-for-Text-to-Image-Synthesis\data\coco\train
 
         self.filenames = self.load_filenames(split_dir)
         self.embeddings = self.load_embedding(split_dir, embedding_type)
@@ -97,7 +98,9 @@ class TextDataset(data.Dataset):
 
     def load_embedding(self, data_dir, embedding_type):
         if embedding_type == 'cnn-rnn':
-            embedding_filename = '/char-CNN-RNN-embeddings.pickle'
+            # embedding_filename = '/char-CNN-RNN-embeddings.pickle'
+            #embedding_filename = '\char-CNN-RNN-embeddings.pickle'
+            embedding_filename = '\char-CNN-RNN-embeddings-subset.pickle'
         elif embedding_type == 'cnn-gru':
             embedding_filename = '/char-CNN-GRU-embeddings.pickle'
         elif embedding_type == 'skip-thought':
@@ -105,10 +108,12 @@ class TextDataset(data.Dataset):
 
         with open(data_dir + embedding_filename, 'rb') as f:
             embeddings = pickle.load(f,encoding='latin1')
-            embeddings = np.array(embeddings)
+            #embeddings = np.array(embeddings)
+            subset_embeddings = np.array(embeddings)
             # embedding_shape = [embeddings.shape[-1]]
-            print('embeddings: ', embeddings.shape)
-        return embeddings
+            print('embeddings: ', subset_embeddings.shape)
+        #return embeddings
+        return subset_embeddings
 
     def load_class_id(self, data_dir, total_num):
         if os.path.isfile(data_dir + '/class_info.pickle'):
@@ -123,6 +128,7 @@ class TextDataset(data.Dataset):
         with open(filepath, 'rb') as f:
             filenames = pickle.load(f)
         print('Load filenames from: %s (%d)' % (filepath, len(filenames)))
+        # return filenames
         return filenames
 
     def __getitem__(self, index):
@@ -138,7 +144,7 @@ class TextDataset(data.Dataset):
 
         # captions = self.captions[key]
         embeddings = self.embeddings[index, :, :]
-        img_name = '%s/images/%s.jpg' % (data_dir, key)
+        img_name = '%s\\train2014\%s.jpg' % (data_dir, key)
         img = self.get_img(img_name, bbox)
 
         embedding_ix = random.randint(0, embeddings.shape[0]-1)
@@ -148,4 +154,5 @@ class TextDataset(data.Dataset):
         return img, embedding
 
     def __len__(self):
-        return len(self.filenames)
+        #return len(self.filenames)
+        return len(self.embeddings)

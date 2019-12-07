@@ -11,7 +11,7 @@ from utils.config import cfg
 from utils.common import ConditioningAugment
 from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator
 
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class STAGE1_Generator(nn.Module):
     def __init__(self):
         super(STAGE1_Generator, self).__init__()
@@ -41,9 +41,15 @@ class STAGE1_Generator(nn.Module):
             nn.Tanh())
 
     def forward(self, txt_embed, noise):
+        print(txt_embed.device)
+
+        txt_embed = txt_embed.cuda(device)
+        print(txt_embed.device)
+        noise = noise.cuda(device)
       
         #Conditional Augmentation
         cond, mu, logvar = self.ConditioningAugment(txt_embed)
+        cond = cond.cuda(device)
         #Add noise
         cond_with_noise = torch.cat((noise, cond), 1)
         #Fully connected layer
@@ -59,7 +65,7 @@ class STAGE1_Generator(nn.Module):
         
         generated_image = self.image1(h5)
         
-        return generated_image
+        return None, generated_image, mu, logvar
 
 class STAGE1_Discriminator(nn.Module):
     def __init__(self):
@@ -87,6 +93,7 @@ class STAGE1_Discriminator(nn.Module):
         self.getConditionalLogits = LogitsForDiscriminator(discDim,conditionDIm)
     
     def forward(self,image):
+        image.cuda(device)
         c1 = self.convLayer(image)
         imgEncode1 = self.down1(c1)
         imgEncode2 = self.down2(imgEncode1)

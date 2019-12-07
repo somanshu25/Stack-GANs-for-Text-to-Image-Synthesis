@@ -2,7 +2,7 @@ ConfigName: '3stages'
 DatasetName: 'birds'
 GPU_ID: '0'
 LatentDim: 100
-DataDir: '../data/birds'
+DataDir: '..\data\birds'
 ImSize: 64
 Workers: 4
 Stage: 1
