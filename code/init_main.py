@@ -20,7 +20,7 @@ import pdb
 
 
 if __name__ == "__main__":
-    cfg_from_file('.\cfg\cocoStage1.yml')
+    cfg_from_file('cfg\cocoStage1.yml')
     #cfg_from_file('./cfg/birds.yml')
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -31,6 +31,7 @@ if __name__ == "__main__":
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    #print("Cfg datadir ", cfg.DataDir)
     dataset = TextDataset(cfg.DataDir, 'train',imsize=cfg.ImSize, transform=image_transform)
     # assert dataset
     dataloader = torch.utils.data.DataLoader(
@@ -38,6 +39,7 @@ if __name__ == "__main__":
             drop_last=True, shuffle=True, num_workers=int(cfg.Workers))
 
     algo = STAGE1_GAN(output_dir)
-    print(len(dataloader))
+    #print(len(dataloader))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #print(device)
     algo.train1(dataloader)  #cfg.Stage

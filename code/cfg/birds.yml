@@ -4,9 +4,9 @@ GPU_ID: '0'
 LatentDim: 100
 DataDir: '..\data\birds'
 ImSize: 64
-Workers: 4
+Workers: 1
 Stage: 1
-BatchSize: 24
+BatchSize: 32
 NumEpochs: 600
 LrDecayEpoch: 100
 saveModelEpoch: 2000

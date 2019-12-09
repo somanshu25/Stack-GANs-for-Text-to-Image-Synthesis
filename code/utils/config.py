@@ -14,7 +14,7 @@ __C.LatentDim = 100
 __C.CUDA = True
 __C.GPU_ID = '0'
 __C.DatasetName = 'coco'
-__C.Workers = 6
+__C.Workers = 1
 __C.ConfigName = ''
 __C.Stage = 1
 __C.DataDir = ''
@@ -22,7 +22,7 @@ __C.ImSize = 64
 # Config variables for Training GANS
 
 __C.BatchSize = 64
-__C.NumEpochs = 600
+__C.NumEpochs = 50
 __C.LrDecayEpoch = 600
 __C.saveModelEpoch = 50
 __C.DiscLR = 0.0002

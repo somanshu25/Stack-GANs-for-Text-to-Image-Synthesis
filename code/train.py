@@ -81,6 +81,7 @@ class STAGE1_GAN:
         optimizerD = optim.Adam(netD.parameters(), lr=discLR, betas=(0.5, 0.999))
         
         for epoch in range(self.max_epoch):
+            print(epoch)
             #### Decay the learning rates after some epochs
             start_t = time.time()
             # if epoch % lrDecayEpoch == 0 and epoch > 0:
@@ -91,7 +92,8 @@ class STAGE1_GAN:
             #     for param_group in optimizerD.param_groups:
             #         param_group['lr'] = discLR
             print(len(data_loader))
-            for i, data in enumerate(data_loader, 0):
+            for i, data in enumerate(data_loader):
+                #print('XYZ')
 
                 ##### Prepare training data
                 realImgs, txtEmbedding = data

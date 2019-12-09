@@ -34,8 +34,11 @@ class TextDataset(data.Dataset):
         # C:\Users\vedire\Desktop\Stack-GANs-for-Text-to-Image-Synthesis\data\coco\train
 
         self.filenames = self.load_filenames(split_dir)
+        print(split_dir)
+        print(embedding_type)
         self.embeddings = self.load_embedding(split_dir, embedding_type)
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
+        print("done initializing textdataset")
         # self.captions = self.load_all_captions()
 
     def get_img(self, img_path, bbox):
@@ -99,8 +102,8 @@ class TextDataset(data.Dataset):
     def load_embedding(self, data_dir, embedding_type):
         if embedding_type == 'cnn-rnn':
             # embedding_filename = '/char-CNN-RNN-embeddings.pickle'
-            #embedding_filename = '\char-CNN-RNN-embeddings.pickle'
-            embedding_filename = '\char-CNN-RNN-embeddings-subset.pickle'
+            embedding_filename = '\char-CNN-RNN-embeddings.pickle'
+            #embedding_filename = '\char-CNN-RNN-embeddings-subset.pickle'
         elif embedding_type == 'cnn-gru':
             embedding_filename = '/char-CNN-GRU-embeddings.pickle'
         elif embedding_type == 'skip-thought':
@@ -108,17 +111,20 @@ class TextDataset(data.Dataset):
 
         with open(data_dir + embedding_filename, 'rb') as f:
             embeddings = pickle.load(f,encoding='latin1')
-            #embeddings = np.array(embeddings)
-            subset_embeddings = np.array(embeddings)
-            # embedding_shape = [embeddings.shape[-1]]
-            print('embeddings: ', subset_embeddings.shape)
+            embeddings = np.array(embeddings)
+            print("loaded emb ", data_dir)
+            #subset_embeddings = np.array(embeddings)
+            # embedding_shape = [embeddinqqgs.shape[-1]]
+            print('embeddings: ', data_dir)
         #return embeddings
-        return subset_embeddings
+        return embeddings
 
     def load_class_id(self, data_dir, total_num):
+        print('loading: ', data_dir)
         if os.path.isfile(data_dir + '/class_info.pickle'):
             with open(data_dir + '/class_info.pickle', 'rb') as f:
                 class_id = pickle.load(f)
+
         else:
             class_id = np.arange(total_num)
         return class_id
@@ -154,5 +160,5 @@ class TextDataset(data.Dataset):
         return img, embedding
 
     def __len__(self):
-        #return len(self.filenames)
-        return len(self.embeddings)
+        return len(self.filenames)
+        #return len(self.embeddings)

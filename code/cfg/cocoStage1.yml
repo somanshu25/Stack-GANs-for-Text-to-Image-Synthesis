@@ -3,9 +3,9 @@ GPU_ID: '0'
 LatentDim: 100
 DataDir: '..\data\coco'
 ImSize: 64
-Workers: 4
+Workers: 1
 Stage: 1
-BatchSize: 2
+BatchSize: 32
 NumEpochs: 120
 LrDecayEpoch: 20
 saveModelEpoch: 10
