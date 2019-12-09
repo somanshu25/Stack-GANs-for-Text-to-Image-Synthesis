@@ -29,7 +29,7 @@ class STAGE1_Generator(nn.Module):
         self.fc1 = nn.Sequential(
             nn.Linear(num_input, num_text_input * 4 * 4),
             nn.BatchNorm1d(num_text_input * 4 * 4),
-            nn.ReLU())
+            nn.ReLU(True))
 
         #Upsampling
         self.up1 = upSamplingAtomic(num_text_input, num_text_input // 2)            # 1024 x 4 x 4 - 512 x 8 x 8
