@@ -49,7 +49,6 @@ def _merge_a_into_b(a, b):
 
         # the types must match, too
         old_type = type(b[k])
-        print(old_type)
         if old_type is not type(v):
             if isinstance(b[k], np.ndarray):
                 v = np.array(v, dtype=b[k].dtype)

@@ -155,7 +155,9 @@ def save_images(data_image, fake_im, epoch, image_dir):
     if data_image is not None:
         data_image = data_image[0:img1_size]
         torchvision.utils.save_image(data_image, '%s/true_samples.png' % image_dir, normalize=True)
+        print('Saving True image')
         torchvision.utils.save_image(fake_im.data, '%s/fake_samples_epoch_%03d.png' % (image_dir, epoch), normalize=True)
+        print('Saving Fake image')
                
 def save_model(netG, netD, epoch, model_dir):
   

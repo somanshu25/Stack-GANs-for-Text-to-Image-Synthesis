@@ -91,7 +91,6 @@ class STAGE1_GAN:
             #     discLR *= 0.5
             #     for param_group in optimizerD.param_groups:
             #         param_group['lr'] = discLR
-            print(len(data_loader))
             for i, data in enumerate(data_loader):
                 #print('XYZ')
 

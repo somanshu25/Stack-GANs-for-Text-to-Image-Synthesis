@@ -34,11 +34,8 @@ class TextDataset(data.Dataset):
         # C:\Users\vedire\Desktop\Stack-GANs-for-Text-to-Image-Synthesis\data\coco\train
 
         self.filenames = self.load_filenames(split_dir)
-        print(split_dir)
-        print(embedding_type)
         self.embeddings = self.load_embedding(split_dir, embedding_type)
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
-        print("done initializing textdataset")
         # self.captions = self.load_all_captions()
 
     def get_img(self, img_path, bbox):
@@ -112,10 +109,8 @@ class TextDataset(data.Dataset):
         with open(data_dir + embedding_filename, 'rb') as f:
             embeddings = pickle.load(f,encoding='latin1')
             embeddings = np.array(embeddings)
-            print("loaded emb ", data_dir)
             #subset_embeddings = np.array(embeddings)
             # embedding_shape = [embeddinqqgs.shape[-1]]
-            print('embeddings: ', data_dir)
         #return embeddings
         return embeddings
 

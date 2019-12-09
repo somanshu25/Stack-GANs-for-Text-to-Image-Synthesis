@@ -41,10 +41,7 @@ class STAGE1_Generator(nn.Module):
             nn.Tanh())
 
     def forward(self, txt_embed, noise):
-        print(txt_embed.device)
-
         txt_embed = txt_embed.cuda(device)
-        print(txt_embed.device)
         noise = noise.cuda(device)
       
         #Conditional Augmentation
