@@ -84,13 +84,13 @@ class STAGE1_GAN:
             print(epoch)
             #### Decay the learning rates after some epochs
             start_t = time.time()
-            # if epoch % lrDecayEpoch == 0 and epoch > 0:
-            #     genLR *= 0.5
-            #     for param_group in optimizerG.param_groups:
-            #         param_group['lr'] = genLR
-            #     discLR *= 0.5
-            #     for param_group in optimizerD.param_groups:
-            #         param_group['lr'] = discLR
+            if epoch % lrDecayEpoch == 0 and epoch > 0:
+                genLR *= 0.5
+                for param_group in optimizerG.param_groups:
+                    param_group['lr'] = genLR
+                discLR *= 0.5
+                for param_group in optimizerD.param_groups:
+                    param_group['lr'] = discLR
             for i, data in enumerate(data_loader):
                 #print('XYZ')
 
@@ -140,11 +140,11 @@ class STAGE1_GAN:
                     save_images(realImgs, fakeImgs , epoch, self.image_dir)
 
                 end_t = time.time()
-                # print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
-                #      Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
-                #      Total Time: %.2fsec
-                #      '''
-                #      % (epoch, self.max_epoch, i, len(data_loader), errDisc.data[0], errGen.data[0], kl_loss.data[0], errDiscReal, errDiscWrong, errDiscFake, (end_t - start_t)))
+                print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
+                     Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
+                     Total Time: %.2fsec
+                     '''
+                     % (epoch, self.max_epoch, i, len(data_loader), errDisc.item(), errGen.item(), kl_loss.item(), errDiscReal.item(), errDiscWrong.item(), errDiscFake.item(), (end_t - start_t)))
 
-                # if(epoch % cfg.saveModelEpoch == 0):
-                #   save_model(netG, netD, epoch, self.model_dir)
+            if(epoch % cfg.saveModelEpoch == 0):
+                save_model(netG, netD, epoch, self.model_dir)

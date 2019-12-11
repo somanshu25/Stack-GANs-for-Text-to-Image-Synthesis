@@ -20,8 +20,8 @@ import pdb
 
 
 if __name__ == "__main__":
-    cfg_from_file('cfg\cocoStage1.yml')
-    #cfg_from_file('./cfg/birds.yml')
+    #cfg_from_file('cfg\cocoStage1.yml')
+    cfg_from_file('cfg\stage1_birds.yml')
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
     output_dir = '..\output\%s_%s_%s' % (cfg.DatasetName,cfg.ConfigName,timestamp)
