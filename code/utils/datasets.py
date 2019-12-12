@@ -99,7 +99,7 @@ class TextDataset(data.Dataset):
     def load_embedding(self, data_dir, embedding_type):
         if embedding_type == 'cnn-rnn':
             # embedding_filename = '/char-CNN-RNN-embeddings.pickle'
-            embedding_filename = '\char-CNN-RNN-embeddings.pickle'
+            embedding_filename = '/char-CNN-RNN-embeddings.pickle'
             #embedding_filename = '\char-CNN-RNN-embeddings-subset.pickle'
         elif embedding_type == 'cnn-gru':
             embedding_filename = '/char-CNN-GRU-embeddings.pickle'
@@ -129,7 +129,7 @@ class TextDataset(data.Dataset):
         print("The data directory is :",data_dir)
         filepath = os.path.join(data_dir, 'filenames.pickle')
         with open(filepath, 'rb') as f:
-            filenames = pickle.load(f,encoding='utf-8')
+            filenames = pickle.load(f,encoding='latin1')
         print('Load filenames from: %s (%d)' % (filepath, len(filenames)))
         # return filenames
         return filenames
@@ -147,6 +147,7 @@ class TextDataset(data.Dataset):
 
         # captions = self.captions[key]
         embeddings = self.embeddings[index, :, :]
+
         img_name = '%s\\images\%s.jpg' % (data_dir, key)
         img = self.get_img(img_name, bbox)
 

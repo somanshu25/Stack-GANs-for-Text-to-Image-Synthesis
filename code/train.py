@@ -99,7 +99,6 @@ class STAGE1_GAN:
                 discLR *= 0.5
                 for param_group in optimizerD.param_groups:
                     param_group['lr'] = discLR
-
             kl_loss_total = 0
             errDiscTotal= 0
             errDiscRealTotal = 0
@@ -180,3 +179,4 @@ class STAGE1_GAN:
             errDiscFakeValues.append(errDiscFakeTotal)
 
         return kl_loss_values,errDiscValues,errGenValues,errDiscRealValues,errDiscWrongValues,errDiscFakeValues
+
