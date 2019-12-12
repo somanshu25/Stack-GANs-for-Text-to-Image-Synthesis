@@ -71,7 +71,7 @@ class TextDataset(data.Dataset):
         #
         filename_bbox = {img_file[:-4]: [] for img_file in filenames}
         numImgs = len(filenames)
-        for i in xrange(0, numImgs):
+        for i in range(0, numImgs):
             # bbox = [x-left, y-top, width, height]
             bbox = df_bounding_boxes.iloc[i][1:].tolist()
 
@@ -107,7 +107,7 @@ class TextDataset(data.Dataset):
             embedding_filename = '/skip-thought-embeddings.pickle'
 
         with open(data_dir + embedding_filename, 'rb') as f:
-            embeddings = pickle.load(f,encoding='latin1')
+            embeddings = pickle.load(f, encoding='latin1')
             embeddings = np.array(embeddings)
             #subset_embeddings = np.array(embeddings)
             # embedding_shape = [embeddinqqgs.shape[-1]]
@@ -118,16 +118,18 @@ class TextDataset(data.Dataset):
         print('loading: ', data_dir)
         if os.path.isfile(data_dir + '/class_info.pickle'):
             with open(data_dir + '/class_info.pickle', 'rb') as f:
-                class_id = pickle.load(f)
+                class_id = pickle.load(f,encoding='latin1')
 
         else:
             class_id = np.arange(total_num)
+
         return class_id
 
     def load_filenames(self, data_dir):
+        print("The data directory is :",data_dir)
         filepath = os.path.join(data_dir, 'filenames.pickle')
         with open(filepath, 'rb') as f:
-            filenames = pickle.load(f)
+            filenames = pickle.load(f,encoding='utf-8')
         print('Load filenames from: %s (%d)' % (filepath, len(filenames)))
         # return filenames
         return filenames
@@ -145,7 +147,7 @@ class TextDataset(data.Dataset):
 
         # captions = self.captions[key]
         embeddings = self.embeddings[index, :, :]
-        img_name = '%s\\train2014\%s.jpg' % (data_dir, key)
+        img_name = '%s\\images\%s.jpg' % (data_dir, key)
         img = self.get_img(img_name, bbox)
 
         embedding_ix = random.randint(0, embeddings.shape[0]-1)

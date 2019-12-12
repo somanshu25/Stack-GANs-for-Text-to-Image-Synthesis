@@ -26,8 +26,9 @@ class STAGE1_Generator(nn.Module):
         self.ConditioningAugment = ConditioningAugment()
 
         #Fully connected layer
+        ## Change from True to False in bias
         self.fc1 = nn.Sequential(
-            nn.Linear(num_input, num_text_input * 4 * 4),
+            nn.Linear(num_input, num_text_input * 4 * 4, bias=False),
             nn.BatchNorm1d(num_text_input * 4 * 4),
             nn.ReLU(True))
 

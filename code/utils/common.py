@@ -42,7 +42,7 @@ def downSamplingAtomic(inputChannels,outputChannels):
     downSamplingBlock = nn.Sequential(
          nn.Conv2d(inputChannels, outputChannels, 4, 2, 1, bias=False),
          nn.BatchNorm2d(outputChannels),
-         nn.LeakyReLU(True),
+         nn.LeakyReLU(0.2,True)        ##   Change 2: Leaky ReLu with 0.2 argument
     ) 
     return downSamplingBlock
 
@@ -162,7 +162,7 @@ def save_images(data_image, fake_im, epoch, image_dir):
 def save_model(netG, netD, epoch, model_dir):
   
     torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (model_dir, epoch))
-    torch.save(netD.state_dict(),' %s/netD_epoch_last.pth' % (model_dir))
+    torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (model_dir, epoch))
     print('Models saved')
     
 def makedir(path):

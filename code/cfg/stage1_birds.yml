@@ -2,11 +2,11 @@ ConfigName: 'stageI'
 DatasetName: 'birds'
 GPU_ID: '0'
 LatentDim: 100
-DataDir: '..\data\birds'
+DataDir: '..\Data\birds'
 ImSize: 64
 Workers: 1
 Stage: 1
 BatchSize: 64
 NumEpochs: 600
 LrDecayEpoch: 50
-saveModelEpoch: 2000
+saveModelEpoch: 599

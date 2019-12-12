@@ -66,6 +66,8 @@ class STAGE1_GAN:
         if cfg.CUDA:
             realLabels = realLabels.cuda()
             fakeLabels = fakeLabels.cuda()
+            ## Changes: Add latentInitial into the cuda device
+            latentInitial = latentInitial.cuda()
         
         ## Parameters for Generator and Discriminator
         genLR = cfg.GenLR
@@ -79,18 +81,32 @@ class STAGE1_GAN:
         optimizerG = optim.Adam(netG_para,lr=genLR,betas=(0.5, 0.999))
 
         optimizerD = optim.Adam(netD.parameters(), lr=discLR, betas=(0.5, 0.999))
-        
+
+        kl_loss_values= []
+        errDiscValues= []
+        errDiscRealValues = []
+        errDiscWrongValues = []
+        errDiscFakeValues = []
+        errGenValues = []
         for epoch in range(self.max_epoch):
             print(epoch)
             #### Decay the learning rates after some epochs
             start_t = time.time()
-            # if epoch % lrDecayEpoch == 0 and epoch > 0:
-            #     genLR *= 0.5
-            #     for param_group in optimizerG.param_groups:
-            #         param_group['lr'] = genLR
-            #     discLR *= 0.5
-            #     for param_group in optimizerD.param_groups:
-            #         param_group['lr'] = discLR
+            if epoch % lrDecayEpoch == 0 and epoch > 0:
+                genLR *= 0.5
+                for param_group in optimizerG.param_groups:
+                    param_group['lr'] = genLR
+                discLR *= 0.5
+                for param_group in optimizerD.param_groups:
+                    param_group['lr'] = discLR
+
+            kl_loss_total = 0
+            errDiscTotal= 0
+            errDiscRealTotal = 0
+            errDiscWrongTotal = 0
+            errDiscFakeTotal = 0
+            errGenTotal = 0
+
             for i, data in enumerate(data_loader):
                 #print('XYZ')
 
@@ -140,11 +156,27 @@ class STAGE1_GAN:
                     save_images(realImgs, fakeImgs , epoch, self.image_dir)
 
                 end_t = time.time()
-                # print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
-                #      Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
-                #      Total Time: %.2fsec
-                #      '''
-                #      % (epoch, self.max_epoch, i, len(data_loader), errDisc.data[0], errGen.data[0], kl_loss.data[0], errDiscReal, errDiscWrong, errDiscFake, (end_t - start_t)))
+                print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
+                     Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
+                     Total Time: %.2f sec
+                     '''
+                     % (epoch, self.max_epoch, i, len(data_loader), errDisc.data.item(), errGen.data.item(), kl_loss.data.item(), errDiscReal.item(), errDiscWrong.item(), errDiscFake.item(), (end_t - start_t)))
 
-                # if(epoch % cfg.saveModelEpoch == 0):
-                #   save_model(netG, netD, epoch, self.model_dir)
+                kl_loss_total += kl_loss.data.item()
+                errDiscTotal += errDisc.data.item()
+                errGenTotal += errGen.data.item()
+                errDiscRealTotal += errDiscReal.item()
+                errDiscWrongTotal += errDiscWrong.item()
+                errDiscFakeTotal += errDiscWrong.item()
+
+            if(epoch % cfg.saveModelEpoch == 0):
+                save_model(netG, netD, epoch, self.model_dir)
+
+            kl_loss_values.append(kl_loss_total)
+            errDiscValues.append(errDiscTotal)
+            errGenValues.append(errGenTotal)
+            errDiscRealValues.append(errDiscRealTotal)
+            errDiscWrongValues.append(errDiscWrongTotal)
+            errDiscFakeValues.append(errDiscFakeTotal)
+
+        return kl_loss_values,errDiscValues,errGenValues,errDiscRealValues,errDiscWrongValues,errDiscFakeValues
