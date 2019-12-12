@@ -168,7 +168,7 @@ class STAGE1_GAN:
                 errDiscWrongTotal += errDiscWrong.item()
                 errDiscFakeTotal += errDiscWrong.item()
 
-            if(epoch % cfg.saveModelEpoch == 0):
+            if(epoch % cfg.saveModelEpoch == 0 or epoch == self.max_epoch-1):
                 save_model(netG, netD, epoch, self.model_dir)
 
             kl_loss_values.append(kl_loss_total)
