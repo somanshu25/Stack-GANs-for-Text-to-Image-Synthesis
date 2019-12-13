@@ -122,8 +122,8 @@ class DiscStageII(nn.Module):
             nn.LeakyReLU(0.2, inplace=True)
         )
 
-        self.condLogits = LogitsForDiscriminator(DID, CD, conditionCrit=True)
-        self.uncondLogits = LogitsForDiscriminator(DID, CD, conditionCrit=False)
+        self.getConditionalLogits  = LogitsForDiscriminator(DID, CD, conditionCrit=True)
+        self.getUnconditionalLogits  = LogitsForDiscriminator(DID, CD, conditionCrit=False)
 
     def forward(self, img):
         imgEmbedding = self.ImgEncode(img)
