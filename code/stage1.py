@@ -89,6 +89,7 @@ class STAGE1_Discriminator(nn.Module):
         # 512 X 4 X 4
 
         self.getConditionalLogits = LogitsForDiscriminator(discDim,conditionDIm)
+        self.getUnconditionalLogits = None
     
     def forward(self,image):
         image.cuda(device)

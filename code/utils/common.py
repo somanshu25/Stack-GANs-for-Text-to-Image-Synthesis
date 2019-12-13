@@ -140,7 +140,7 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
     fakeEmbedding = netDisc(fakeImages)
     #fakeLogits = nn.parallel.data.parallel(netDisc.getConditionalLogits,(fakeEmbedding,cond),gpus)
     fakeLogits = netDisc.getConditionalLogits(fakeEmbedding,cond)
-    errDiscFake = criterion(fakeLogits,realLabels)
+    errDiscFake = criterion(fakeLogits,fakeLabels)
 
     ## real paris
     #realEmbedding = nn.parallel.data.parallel(netDisc,(realImages),gpus)
@@ -155,7 +155,22 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
     wrongLogits = netDisc.getConditionalLogits(realEmbedding[:(realImages.shape[0]-1)],cond[1:])
     errDiscWrong = criterion(wrongLogits,fakeLabels[1:])
 
-    return errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong, errDiscReal, errDiscWrong, errDiscFake
+    if netD.getUnconditionalLogits is not None:
+        realLogits = netD.UnconditionalLogits(realEmbedding)
+        fakeLogits = netD.UnconditionalLogits(fakeEmbedding)
+
+        errDiscRealUncond = criterion(realLogits, realLabels)
+        errDiscFakeUncond = criterion(fakeLogits, fakeLabels)
+
+        errDisc = ((errDiscReal + errDiscRealUncond) / 2. +
+                (errDiscFake + errDiscWrong + errDiscFakeUncond) / 3.)
+        errDiscReal = (errDiscReal + errDiscRealUncond) / 2.
+        errDiscFake = (errDiscFake + errDiscFakeUncond) / 2.
+
+    else:
+        errDisc = errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong
+
+    return errDisc, errDiscReal, errDiscWrong, errDiscFake
 
 def save_images(data_image, fake_im, epoch, image_dir):
     img1_size = cfg.ImSize
