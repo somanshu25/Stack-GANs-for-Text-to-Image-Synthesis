@@ -9,7 +9,7 @@ import numpy as np
 import torchfile
 from utils.config import cfg
 from utils.common import ConditioningAugment
-from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator, residualBlocks
+from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator, residualBlocks, downSamplingAtomicII
 from stage1 import STAGE1_Generator
 
 
@@ -45,13 +45,13 @@ class GenStageII(nn.Module):
     def network(self):
 
         GID = self.gDim
-        self.downSamplingAtomic = downSamplingAtomic()
+        self.downSamplingAtomicII = downSamplingAtomicII()
         self.ConditioningAugment = ConditioningAugment()
         self.encoder = nn.Sequential(
             nn.Conv2d(3, GID, 3, stride=1, padding=1, bias=False),
             nn.ReLU(True))
-        self.downSample1 = self.downSamplingAtomic(GID, GID * 2)
-        self.downSample2 = self.downSamplingAtomic(GID * 2, GID * 4)
+        self.downSample1 = self.downSamplingAtomicII(GID, GID * 2)
+        self.downSample2 = self.downSamplingAtomicII(GID * 2, GID * 4)
 
         self.HighRes = nn.Sequential(
             nn.Conv2d(self.cDim + GID * 4, GID * 4, 3, stride=1, padding=1, bias=False),
