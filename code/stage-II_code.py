@@ -9,7 +9,7 @@ import numpy as np
 import torchfile
 from utils.config import cfg
 from utils.common import ConditioningAugment
-from utils.common import downSamplingAtomic, upSamplingAtomic, LogitsForDiscriminator, residualBlocks, downSamplingAtomicII
+from utils.common import upSamplingAtomic, LogitsForDiscriminator, residualBlocks, downSamplingAtomicII
 from stage1 import STAGE1_Generator
 
 
