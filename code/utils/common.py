@@ -46,6 +46,14 @@ def downSamplingAtomic(inputChannels,outputChannels):
     ) 
     return downSamplingBlock
 
+def downSamplingAtomicII(inputChannels,outputChannels):
+    downSamplingBlockII = nn.Sequential(
+         nn.Conv2d(inputChannels, outputChannels, 4, 2, 1, bias=False),
+         nn.BatchNorm2d(outputChannels),
+         nn.ReLU(True)    
+    ) 
+    return downSamplingBlockII
+
 def KL_loss(mu, logvar):
     # -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
