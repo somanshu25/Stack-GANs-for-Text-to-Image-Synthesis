@@ -24,7 +24,8 @@ from utils.common import computeGeneratorLoss,computeDiscriminatorLoss, makedir,
 import errno
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-class STAGE1_GAN:
+class STAGE2_GAN:
+
     def __init__(self, output_dir):
         self.model_dir = os.path.join(output_dir,'Model')
         self.image_dir = os.path.join(output_dir,'Image')

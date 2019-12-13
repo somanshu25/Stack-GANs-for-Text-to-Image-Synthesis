@@ -16,6 +16,7 @@ __C.GPU_ID = '0'
 __C.DatasetName = ''
 __C.Workers = 1
 __C.ConfigName = ''
+__C.Stage1Gen = ''
 __C.Stage = 1
 __C.DataDir = ''
 __C.ImSize = 64

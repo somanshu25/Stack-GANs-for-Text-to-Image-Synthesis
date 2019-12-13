@@ -15,7 +15,7 @@ import dateutil.tz
 from utils.datasets import TextDataset
 from utils.config import cfg,cfg_from_file
 from utils.common import makedir
-from train import STAGE1_GAN
+from train_stage1 import STAGE1_GAN
 import pdb
 
 
@@ -43,3 +43,12 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #print(device)
     kl_loss_values,errDiscValues,errGenValues,errDiscRealValues,errDiscWrongValues,errDiscFakeValues = algo.train1(dataloader)  #cfg.Stage
+
+    cfg_from_file('cfg\stage1_birds.yml')
+    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
+    output_dir = '..\output\%s_%s_%s' % (cfg.DatasetName,cfg.ConfigName,timestamp)
+    num_gpu = len(cfg.GPU_ID.split(','))
+
+    algo2 = STAGE2_GAN(output_dir)
+    kl_loss_values2,errDiscValues2,errGenValues2,errDiscRealValues2,errDiscWrongValues2,errDiscFakeValues2 = algo2.train2(dataloader)  #cfg.Stage
