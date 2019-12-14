@@ -7,6 +7,8 @@ ImSize: 64
 Workers: 1
 Stage: 1
 BatchSize: 64
-NumEpochs: 600
+NumEpochs: 300
 LrDecayEpoch: 50
 saveModelEpoch: 50
+NetGen: '..\output\birds_final\Model\netG_epoch_100.pth'
+NetDisc: '..\output\birds_final\Model\netD_epoch_100.pth'

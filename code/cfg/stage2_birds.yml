@@ -2,12 +2,12 @@ ConfigName: 'stageII'
 DatasetName: 'birds'
 GPU_ID: '0'
 LatentDim: 100
-Stage1Gen: '..\output\birds_final\netG_epoch_100.pth'
+StageIGen: '..\output\birds_final\Model\netG_epoch_100.pth'
 DataDir: '..\Data\birds'
 ImSize: 256
 Workers: 1
 Stage: 2
-BatchSize: 64
+BatchSize: 4
 NumEpochs: 600
 LrDecayEpoch: 50
 saveModelEpoch: 50
