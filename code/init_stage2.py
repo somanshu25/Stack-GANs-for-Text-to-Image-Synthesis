@@ -918,12 +918,11 @@ import datetime
 import dateutil
 import dateutil.tz
 
-# from utils.datasets import TextDataset
-# from utils.config import cfg,cfg_from_file
-# from utils.common import makedir
-# from train import STAGE1_GAN
+from utils.datasets import TextDataset
+from utils.config import cfg,cfg_from_file
+from utils.common import makedir
+from train import STAGE2_GAN
 import pdb
-get_ipython().run_line_magic('load_ext', 'tensorboard')
 import os
 import time, datetime
 
@@ -952,20 +951,6 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     algo.train2(dataloader)  #cfg.Stage
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-get_ipython().system('pwd')
-
-
-# In[ ]:
 
 
 

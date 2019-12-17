@@ -28,7 +28,7 @@ class residualBlocks(nn.Module):
         output = output + input
         output = self.relu(output)
         return output
- 
+
 def upSamplingAtomic(inputChannels, outputChannels):
     upSamplingBlock = nn.Sequential (
         nn.Upsample(scale_factor=2,mode='nearest'),
@@ -43,15 +43,15 @@ def downSamplingAtomic(inputChannels,outputChannels):
          nn.Conv2d(inputChannels, outputChannels, 4, 2, 1, bias=False),
          nn.BatchNorm2d(outputChannels),
          nn.LeakyReLU(0.2,True)        ##   Change 2: Leaky ReLu with 0.2 argument
-    ) 
+    )
     return downSamplingBlock
 
 def downSamplingAtomicII(inputChannels,outputChannels):
     downSamplingBlockII = nn.Sequential(
          nn.Conv2d(inputChannels, outputChannels, 4, 2, 1, bias=False),
          nn.BatchNorm2d(outputChannels),
-         nn.ReLU(True)    
-    ) 
+         nn.ReLU(True)
+    )
     return downSamplingBlockII
 
 def KL_loss(mu, logvar):
@@ -67,12 +67,13 @@ class ConditioningAugment(nn.Module):
         self.cDim = cfg.ConditionDim
         self.fc = nn.Linear(self.tDim,self.cDim * 2)
         self.relu = nn.ReLU()
-    
+
     def encode(self,embeddings):
         out = self.fc(embeddings)
         out = self.relu(out)
         mu = out[:,:self.cDim]
         var = out[:,self.cDim:]
+        del out
         return mu,var
 
     def forward(self,embeddings):
@@ -84,6 +85,7 @@ class ConditioningAugment(nn.Module):
             eps = torch.FloatTensor(std.size()).normal_()
         eps = Variable(eps)
         temp = eps.mul(std).add_(mu)
+        del std,eps
         return temp, mu, var
 
 class LogitsForDiscriminator(nn.Module):
@@ -103,9 +105,9 @@ class LogitsForDiscriminator(nn.Module):
         else:
             self.output = nn.Sequential(
                 nn.Conv2d(self.tDim,1,kernel_size = 4,stride = 4),
-                nn.Sigmoid()  
-            ) 
-    
+                nn.Sigmoid()
+            )
+
     def forward(self,h,c = None):
         if self.conditionCrit and c is not None:
             c = c.view(-1,self.cDim,1,1)
@@ -113,10 +115,13 @@ class LogitsForDiscriminator(nn.Module):
             hc = torch.cat((h,c),1)
         else:
             hc = h
-        
+
         output = self.output(hc)
+
+        del c,hc
         return output.view(-1)
 
+import pdb
 
 def computeGeneratorLoss(netDisc,fakeImages,realLabels,conditions,gpus):
     criterion = nn.BCELoss()
@@ -128,17 +133,24 @@ def computeGeneratorLoss(netDisc,fakeImages,realLabels,conditions,gpus):
     fakeLogits = netDisc.getConditionalLogits(fakeFeatures,cond)
     errorDiscFake = criterion(fakeLogits,realLabels)
 
+    if netDisc.getUnconditionalLogits is not None:
+        fakeLogits = netDisc.getUnconditionalLogits(fakeFeatures)
+        errDiscFakeUncond = criterion(fakeLogits,realLabels)
+        errorDiscFake += errDiscFakeUncond
+
+    del fakeFeatures,fakeLogits
     return errorDiscFake
 
 def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels,conditions,gpus):
     criterion = nn.BCELoss()
     cond = conditions.detach()
     fakeImages = fakeImages.detach()
-
+    #pdb.set_trace()
     ## fake pairs
     # fakeEmbedding = nn.parallel.data_parallel(netDisc,(fakeImages),gpus)
     fakeEmbedding = netDisc(fakeImages)
     #fakeLogits = nn.parallel.data.parallel(netDisc.getConditionalLogits,(fakeEmbedding,cond),gpus)
+
     fakeLogits = netDisc.getConditionalLogits(fakeEmbedding,cond)
     errDiscFake = criterion(fakeLogits,fakeLabels)
 
@@ -155,9 +167,9 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
     wrongLogits = netDisc.getConditionalLogits(realEmbedding[:(realImages.shape[0]-1)],cond[1:])
     errDiscWrong = criterion(wrongLogits,fakeLabels[1:])
 
-    if netD.getUnconditionalLogits is not None:
-        realLogits = netD.UnconditionalLogits(realEmbedding)
-        fakeLogits = netD.UnconditionalLogits(fakeEmbedding)
+    if netDisc.getUnconditionalLogits is not None:
+        realLogits = netDisc.getUnconditionalLogits(realEmbedding)
+        fakeLogits = netDisc.getUnconditionalLogits(fakeEmbedding)
 
         errDiscRealUncond = criterion(realLogits, realLabels)
         errDiscFakeUncond = criterion(fakeLogits, fakeLabels)
@@ -170,24 +182,28 @@ def computeDiscriminatorLoss(netDisc,fakeImages,realImages,fakeLabels,realLabels
     else:
         errDisc = errDiscReal + 0.5*errDiscFake + 0.5*errDiscWrong
 
+    del fakeEmbedding,fakeLogits,realLogits,realEmbedding
     return errDisc, errDiscReal, errDiscWrong, errDiscFake
 
-def save_images(data_image, fake_im, epoch, image_dir):
+def save_images(data_image, fake_im, stage1Img, epoch, image_dir):
     img1_size = cfg.ImSize
     fake_im = fake_im[0:img1_size]
     if data_image is not None:
         data_image = data_image[0:img1_size]
-        torchvision.utils.save_image(data_image, '%s/true_samples.png' % image_dir, normalize=True)
+        torchvision.utils.save_image(data_image, '%s/true_samples_epoch_%03d.png' % (image_dir, epoch), normalize=True)
         print('Saving True image')
         torchvision.utils.save_image(fake_im.data, '%s/fake_samples_epoch_%03d.png' % (image_dir, epoch), normalize=True)
         print('Saving Fake image')
-               
+        torchvision.utils.save_image(stage1Img.data, '%s/stage1Img_samples_epoch_%03d.png' % (image_dir, epoch), normalize=True)
+        print('Saving stage1 output image')
+
+
 def save_model(netG, netD, epoch, model_dir):
-  
+
     torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (model_dir, epoch))
     torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (model_dir, epoch))
     print('Models saved')
-    
+
 def makedir(path):
     try:
         os.makedirs(path)
@@ -196,7 +212,7 @@ def makedir(path):
             pass
         else:
             raise
-    
+
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -209,5 +225,3 @@ def weights_init(m):
         m.weight.data.normal_(0.0, 0.02)
         if m.bias is not None:
             m.bias.data.fill_(0.0)
-
-

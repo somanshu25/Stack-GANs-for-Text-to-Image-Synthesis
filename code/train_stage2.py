@@ -55,16 +55,14 @@ class STAGE2_GAN:
 
         return netG,netD
 
-    def train2(self,data_loader):
+       def train2(self,data_loader):
         netG, netD = self.loadStage2()       # Initialize Generator and Discriminator
         netG = netG.to(device)
         netD = netD.to(device)
-
         nz = cfg.LatentDim                  # 100
         latentInitial = Variable(torch.FloatTensor(self.batch_size,nz))   ## Latent variables
         realLabels = Variable(torch.FloatTensor(self.batch_size).fill_(1))  ## Real values (1)
         fakeLabels = Variable(torch.FloatTensor(self.batch_size).fill_(0))  ## Fake values (0)
-
         if cfg.CUDA:
             realLabels = realLabels.cuda()
             fakeLabels = fakeLabels.cuda()
@@ -75,7 +73,6 @@ class STAGE2_GAN:
         genLR = cfg.GenLR
         discLR = cfg.DiscLR
         lrDecayEpoch = cfg.LrDecayEpoch
-
         netG_para = []
         for p in netG.parameters():
             if p.requires_grad:
@@ -90,7 +87,6 @@ class STAGE2_GAN:
         errDiscWrongValues = []
         errDiscFakeValues = []
         errGenValues = []
-
         for epoch in range(self.max_epoch):
             print(epoch)
             #### Decay the learning rates after some epochs
@@ -102,16 +98,8 @@ class STAGE2_GAN:
                 discLR *= 0.5
                 for param_group in optimizerD.param_groups:
                     param_group['lr'] = discLR
-            kl_loss_total = 0
-            errDiscTotal= 0
-            errDiscRealTotal = 0
-            errDiscWrongTotal = 0
-            errDiscFakeTotal = 0
-            errGenTotal = 0
 
             for i, data in enumerate(data_loader):
-                #print('XYZ')
-
                 ##### Prepare training data
                 realImgs, txtEmbedding = data
                 realImgs = Variable(realImgs)
@@ -123,8 +111,8 @@ class STAGE2_GAN:
                 ##### Generate fake images
                 latentInitial.data.normal_(0, 1)
                 inputs = (txtEmbedding, latentInitial)
-                #_, fakeImgs, mu, logvar = nn.parallel.data_parallel(netG, inputs, self.gpus)
-                _, fakeImgs,mu,logvar = netG(txtEmbedding, latentInitial)
+#                 _, fakeImgs, mu, logvar = nn.parallel.data_parallel(netG, inputs, self.gpus)
+                stage1Img, fakeImgs,mu,logvar = netG(txtEmbedding, latentInitial)
 
                 #####  Update D network
                 netD.zero_grad()
@@ -142,43 +130,40 @@ class STAGE2_GAN:
                 optimizerG.step()
 
                 if i % 100 ==0 and epoch % 5 == 0:
-                    # summary_D = summary.scalar('D_loss', errD.data[0])
-                    # summary_D_r = summary.scalar('D_loss_real', errD_real)
-                    # summary_D_w = summary.scalar('D_loss_wrong', errD_wrong)
-                    # summary_D_f = summary.scalar('D_loss_fake', errD_fake)
-                    # summary_G = summary.scalar('G_loss', errG.data[0])
-                    # summary_KL = summary.scalar('KL_loss', kl_loss.data[0])
-                    #
-                    # self.summary_writer.add_summary(summary_D, count)
-                    # self.summary_writer.add_summary(summary_D_r, count)
-                    # self.summary_writer.add_summary(summary_D_w, count)
-                    # self.summary_writer.add_summary(summary_D_f, count)
-                    # self.summary_writer.add_summary(summary_G, count)
-                    # self.summary_writer.add_summary(summary_KL, count)
-                    save_images(realImgs, fakeImgs , epoch, self.image_dir)
+                    save_images(realImgs, fakeImgs ,stage1Img, epoch, self.image_dir)
 
                 end_t = time.time()
-                print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
-                     Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
-                     Total Time: %.2f sec
-                     '''
-                     % (epoch, self.max_epoch, i, len(data_loader), errDisc.data.item(), errGen.data.item(), kl_loss.data.item(), errDiscReal.item(), errDiscWrong.item(), errDiscFake.item(), (end_t - start_t)))
-
-                kl_loss_total += kl_loss.data.item()
-                errDiscTotal += errDisc.data.item()
-                errGenTotal += errGen.data.item()
-                errDiscRealTotal += errDiscReal.item()
-                errDiscWrongTotal += errDiscWrong.item()
-                errDiscFakeTotal += errDiscWrong.item()
+                # print('''[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f Loss_KL: %.4f
+                #      Loss_real: %.4f Loss_wrong:%.4f Loss_fake %.4f
+                #      Total Time: %.2f sec
+                #      '''
+                #
+                #      % (epoch, self.max_epoch, i, len(data_loader), errDisc.data.item(), errGen.data.item(), kl_loss.data.item(), errDiscReal.item(), errDiscWrong.item(), errDiscFake.item(), (end_t - start_t)))
+                #
 
             if(epoch % cfg.saveModelEpoch == 0 or epoch == self.max_epoch-1):
                 save_model(netG, netD, epoch, self.model_dir)
 
-            kl_loss_values.append(kl_loss_total)
-            errDiscValues.append(errDiscTotal)
-            errGenValues.append(errGenTotal)
-            errDiscRealValues.append(errDiscRealTotal)
-            errDiscWrongValues.append(errDiscWrongTotal)
-            errDiscFakeValues.append(errDiscFakeTotal)
+   def eval(self,dataloader,listIndex):
+        netG, _ = self.loadStage2()       # Initialize Generator
+        nz = cfg.LatentDim                  # 100
+        latentInitial = Variable(torch.FloatTensor(self.batch_size,nz))   ## Latent variables
 
-        return kl_loss_values,errDiscValues,errGenValues,errDiscRealValues,errDiscWrongValues,errDiscFakeValues
+        if cfg.CUDA:
+            latentInitial = latentInitial.cuda()
+
+        for i, data in enumerate(dataloader):
+
+            if i in listIndex:
+                realImgs, txtEmbedding = data
+                realImgs = Variable(realImgs)
+                txtEmbedding = Variable(txtEmbedding)
+                if cfg.CUDA:
+                    realImgs = realImgs.cuda()
+                    txtEmbedding = txtEmbedding.cuda()
+
+                ##### Generate fake images
+                latentInitial.data.normal_(0, 1)
+                netG.eval()
+                stage1Img, fakeImgs,mu,logvar = netG(txtEmbedding, latentInitial)
+                save_images(realImgs, fakeImgs ,stage1Img, i, self.image_dir)

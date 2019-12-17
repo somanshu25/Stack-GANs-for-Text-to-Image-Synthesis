@@ -16,13 +16,12 @@ __C.GPU_ID = '0'
 __C.DatasetName = ''
 __C.Workers = 1
 __C.ConfigName = ''
-__C.Stage1Gen = ''
 __C.Stage = 1
 __C.DataDir = ''
 __C.ImSize = 64
 # Config variables for Training GANS
 
-__C.BatchSize = 64
+__C.BatchSize = 4
 __C.NumEpochs = 50
 __C.LrDecayEpoch = 600
 __C.saveModelEpoch = 50
@@ -35,6 +34,8 @@ __C.RNum = 4
 __C.ConditionDim = 128
 __C.DiscInputDim = 64
 __C.GenInputDim = 128
+__C.StageIGen= ''
+__C.StageIIGen= ''
 
 def _merge_a_into_b(a, b):
     """Merge config dictionary a into config dictionary b, clobbering the

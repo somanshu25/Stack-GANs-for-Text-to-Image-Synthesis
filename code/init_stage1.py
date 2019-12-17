@@ -15,7 +15,7 @@ import dateutil.tz
 from utils.datasets import TextDataset
 from utils.config import cfg,cfg_from_file
 from utils.common import makedir
-from train_stage1 import STAGE1_GAN
+from train_stage1 import STAGE1_GAN,STAGE2_GAN
 import pdb
 
 
@@ -51,4 +51,6 @@ if __name__ == "__main__":
     num_gpu = len(cfg.GPU_ID.split(','))
 
     algo2 = STAGE2_GAN(output_dir)
-    kl_loss_values2,errDiscValues2,errGenValues2,errDiscRealValues2,errDiscWrongValues2,errDiscFakeValues2 = algo2.train2(dataloader)  #cfg.Stage
+    algo2.train2(dataloader)  #cfg.Stage
+
+
